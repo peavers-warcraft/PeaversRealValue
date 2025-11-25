@@ -1,4 +1,5 @@
-## Interface: 110205
+## Interface: 120000
+
 ## Title: |cff3abdf7Peavers|rRealValue
 ## Notes: Shows the real-world dollar value of items based on their auction house price
 ## IconTexture: Interface\AddOns\PeaversCommons\src\Media\Icon.tga
