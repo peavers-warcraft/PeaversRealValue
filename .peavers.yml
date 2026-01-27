@@ -1,5 +1,8 @@
 # .peavers.yml - Addon metadata for peavers.io website
 
+# Featured addon appears prominently on homepage
+featured: true
+
 # Icon to display on website
 iconType: CurrencyRuneIcon
 
