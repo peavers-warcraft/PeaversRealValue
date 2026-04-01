@@ -13,6 +13,8 @@ local Config = ConfigManager:New(addonName, {
     showSymbol = true,
     decimalPlaces = 2,
     priceSource = "auction",
+    consumableAlerts = true,
+    consumableChannel = "self",
 })
 
 PRV.Config = Config

@@ -174,7 +174,42 @@ function ConfigUI:CreateGeneralOptions(content, yPos, baseSpacing, sectionSpacin
         end
     )
     yPos = newY - 8
-    
+
+    local _, newY = PeaversCommons.ConfigUIUtils.CreateCheckbox(
+        content,
+        "PRVConsumableAlertsCheckbox",
+        "Show chat message when using consumables",
+        controlIndent, yPos,
+        PRV.Config.consumableAlerts,
+        function(checked)
+            PRV.Config.consumableAlerts = checked
+            PRV.Config:Save()
+        end
+    )
+    yPos = newY - 8
+
+    local channels = {
+        self = "Self Only",
+        say = "Say (/s)",
+        party = "Party (/p)",
+        guild = "Guild (/g)",
+        instance = "Instance Group",
+        raid = "Raid",
+        auto = "Automatic",
+    }
+
+    local channelContainer, channelDropdown = PeaversCommons.ConfigUIUtils.CreateDropdown(
+        content, "PRVConsumableChannelDropdown",
+        "Consumable Alert Channel", channels,
+        channels[PRV.Config.consumableChannel] or "Self Only", 400,
+        function(value)
+            PRV.Config.consumableChannel = value
+            PRV.Config:Save()
+        end
+    )
+    channelContainer:SetPoint("TOPLEFT", controlIndent, yPos)
+    yPos = yPos - 65
+
     local thresholdContainer, thresholdSlider = PeaversCommons.ConfigUIUtils.CreateSlider(
         content, "PRVPriceThresholdSlider",
         "Price Threshold (gold)", 0, 10000, 10,

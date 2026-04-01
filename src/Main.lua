@@ -47,7 +47,8 @@ PeaversCommons.Events:Init(addonName, function()
     PRV.ConfigUI:Initialize()
     PRV.PriceCache:Load()
     PRV.TooltipHook:Initialize()
-    
+    PRV.ConsumableTracker:Initialize()
+
     -- Save cache periodically
     PeaversCommons.Events:RegisterOnUpdate(60, function()
         PRV.PriceCache:Save()

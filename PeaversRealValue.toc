@@ -17,6 +17,7 @@
 
 src\Core\PriceCache.lua
 src\Core\TooltipHook.lua
+src\Core\ConsumableTracker.lua
 
 src\Utils\Config.lua
 src\Utils\ConfigUI.lua

@@ -19,7 +19,7 @@ function TooltipHook:GetCurrentRegionName()
     return regionMap[regionID] or "US"
 end
 
-local function FormatRealValue(goldValue)
+function TooltipHook.FormatRealValue(goldValue)
     if not goldValue or goldValue <= 0 then
         return nil
     end
@@ -85,7 +85,7 @@ function TooltipHook:ProcessTooltipData(tooltip, tooltipData)
         return
     end
     
-    local realValue = FormatRealValue(price)
+    local realValue = TooltipHook.FormatRealValue(price)
     if realValue then
         tooltip:AddDoubleLine(
             "Real Value",           
