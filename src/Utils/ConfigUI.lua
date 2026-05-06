@@ -4,366 +4,295 @@ local ConfigUI = {}
 PRV.ConfigUI = ConfigUI
 
 local PeaversCommons = _G.PeaversCommons
+local W = PeaversCommons.Widgets
+local C = W.Colors
 local Utils = PeaversCommons.Utils
 
-function ConfigUI:InitializeOptions()
-    local panel = PeaversCommons.ConfigUIUtils.CreateSettingsPanel(
-        "Settings",
-        "Configuration options for PeaversRealValue"
-    )
-    
-    local content = panel.content
-    local yPos = panel.yPos
-    local baseSpacing = panel.baseSpacing
-    local sectionSpacing = panel.sectionSpacing
-    
-    yPos = self:CreateGeneralOptions(content, yPos, baseSpacing, sectionSpacing)
-    yPos = self:CreateCurrencyOptions(content, yPos, baseSpacing, sectionSpacing)
-    yPos = self:CreatePriceSourceOptions(content, yPos, baseSpacing, sectionSpacing)
-    yPos = self:CreatePerformanceOptions(content, yPos, baseSpacing, sectionSpacing)
-    
-    panel:UpdateContentHeight(yPos)
-    
-    return panel
+local pageOpts = {
+    indent = 25,
+    width = 360,
+}
+
+local function GetPageOpts(parentFrame)
+    local opts = {}
+    for k, v in pairs(pageOpts) do opts[k] = v end
+    local frameWidth = parentFrame:GetWidth()
+    if frameWidth and frameWidth > 100 then
+        opts.width = frameWidth - (opts.indent * 2) - 10
+    end
+    return opts
 end
 
-function ConfigUI:InitializeRatesPanel()
-    local panel = PeaversCommons.ConfigUIUtils.CreateSettingsPanel(
-        "Rates",
-        "Current exchange rates and token prices"
-    )
-    
-    local content = panel.content
-    local yPos = panel.yPos
-    local baseSpacing = panel.baseSpacing
-    local sectionSpacing = panel.sectionSpacing
-    
-    local PCD = _G.PeaversCurrencyData
-    if not PCD then
-        local errorText = content:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-        errorText:SetPoint("TOPLEFT", baseSpacing, yPos)
-        errorText:SetText("PeaversCurrencyData not available")
-        errorText:SetTextColor(1, 0, 0)
-        return panel
-    end
-    
-    -- Last Updated section
-    local lastUpdateHeader, newY = PeaversCommons.ConfigUIUtils.CreateSectionHeader(content, "Data Freshness", baseSpacing, yPos)
-    yPos = newY - 10
-    
-    local lastUpdatedLabel = content:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    lastUpdatedLabel:SetPoint("TOPLEFT", baseSpacing + 15, yPos)
-    lastUpdatedLabel:SetText("Last Updated:")
-    
-    local lastUpdatedValue = content:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    lastUpdatedValue:SetPoint("TOPLEFT", lastUpdatedLabel, "TOPRIGHT", 10, 0)
-    lastUpdatedValue:SetText(PCD:GetLastUpdated() or "Unknown")
-    yPos = yPos - 25
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateSeparator(content, baseSpacing, yPos)
-    yPos = newY - 15
-    
-    -- WoW Token Prices section
-    local tokenHeader, newY = PeaversCommons.ConfigUIUtils.CreateSectionHeader(content, "WoW Token Prices", baseSpacing, yPos)
-    yPos = newY - 10
-    
-    local currentRegion = PRV.TooltipHook and PRV.TooltipHook.GetCurrentRegionName and PRV.TooltipHook:GetCurrentRegionName() or "US"
-    
-    if PCD.TokenPrices and PCD.TokenPrices.regions then
-        local regionData = PCD.TokenPrices.regions[currentRegion]
-        if regionData then
-            -- Current Region Token Price
-            local regionLabel = content:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-            regionLabel:SetPoint("TOPLEFT", baseSpacing + 15, yPos)
-            regionLabel:SetText(currentRegion .. " Region:")
-            regionLabel:SetTextColor(1, 0.82, 0)
-            
-            local tokenPriceText = content:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-            tokenPriceText:SetPoint("TOPLEFT", regionLabel, "TOPRIGHT", 10, 0)
-            tokenPriceText:SetText(string.format("%s = %s", 
-                PCD:FormatWoWCurrency(regionData.goldPrice), 
-                PCD:FormatCurrency(regionData.realPrice, regionData.currency)
-            ))
-            yPos = yPos - 25
-            
-            -- Gold to Currency conversion
-            local goldValueLabel = content:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-            goldValueLabel:SetPoint("TOPLEFT", baseSpacing + 15, yPos)
-            goldValueLabel:SetText("1 Gold =")
-            
-            local goldValueText = content:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-            goldValueText:SetPoint("TOPLEFT", goldValueLabel, "TOPRIGHT", 10, 0)
-            local goldValue = regionData.realPrice / regionData.goldPrice
-            goldValueText:SetText(PCD:FormatCurrency(goldValue, regionData.currency, nil, 6))
-            yPos = yPos - 35
-        end
-    end
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateSeparator(content, baseSpacing, yPos)
-    yPos = newY - 15
-    
-    -- Currency Exchange Rates section
-    local ratesHeader, newY = PeaversCommons.ConfigUIUtils.CreateSectionHeader(content, "Currency Exchange Rates", baseSpacing, yPos)
-    yPos = newY - 10
-    
-    local commonCurrencies = {"EUR", "GBP", "AUD", "CAD", "JPY", "CNY", "KRW"}
-    local baseCurrency = "USD"
-    
-    for _, currency in ipairs(commonCurrencies) do
-        local rate = PCD:GetExchangeRate(baseCurrency, currency)
-        if rate then
-            local currencyLabel = content:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-            currencyLabel:SetPoint("TOPLEFT", baseSpacing + 15, yPos)
-            currencyLabel:SetText(string.format("1 %s =", baseCurrency))
-            
-            local rateText = content:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-            rateText:SetPoint("TOPLEFT", currencyLabel, "TOPRIGHT", 10, 0)
-            rateText:SetText(string.format("%.4f %s", rate, currency))
-            
-            local symbol = PCD:GetCurrencySymbol(currency)
-            if symbol and symbol ~= currency then
-                local symbolText = content:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-                symbolText:SetPoint("TOPLEFT", rateText, "TOPRIGHT", 5, 0)
-                symbolText:SetText("(" .. symbol .. ")")
-                symbolText:SetTextColor(0.7, 0.7, 0.7)
-            end
-            
-            yPos = yPos - 20
-        end
-    end
-    
-    panel:UpdateContentHeight(yPos)
-    
-    panel.OnRefresh = function()
-        if lastUpdatedValue then
-            lastUpdatedValue:SetText(PCD:GetLastUpdated() or "Unknown")
-        end
-    end
-    
-    return panel
-end
+function ConfigUI:BuildGeneralPage(parentFrame)
+    local y = -10
+    local opts = GetPageOpts(parentFrame)
+    local indent = opts.indent
+    local width = opts.width
 
-function ConfigUI:CreateGeneralOptions(content, yPos, baseSpacing, sectionSpacing)
-    local controlIndent = baseSpacing + 15
-    
-    local header, newY = PeaversCommons.ConfigUIUtils.CreateSectionHeader(content, "General Settings", baseSpacing, yPos)
-    yPos = newY - 10
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateCheckbox(
-        content,
-        "PRVEnabledCheckbox",
-        "Enable real value display",
-        controlIndent, yPos,
-        PRV.Config.enabled,
-        function(checked)
+    local _, newY = W:CreateSectionHeader(parentFrame, "General Settings", indent, y)
+    y = newY - 8
+
+    local toggle1 = W:CreateToggle(parentFrame, "Enable real value display", {
+        checked = PRV.Config.enabled,
+        width = width,
+        onChange = function(checked)
             PRV.Config.enabled = checked
             PRV.Config:Save()
-        end
-    )
-    yPos = newY - 8
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateCheckbox(
-        content,
-        "PRVShowOnlyWithPriceCheckbox",
-        "Only show value for items with known auction house prices",
-        controlIndent, yPos,
-        PRV.Config.showOnlyWithPrice,
-        function(checked)
+        end,
+    })
+    toggle1:SetPoint("TOPLEFT", indent, y)
+    y = y - 30
+
+    local toggle2 = W:CreateToggle(parentFrame, "Only show value for items with known auction house prices", {
+        checked = PRV.Config.showOnlyWithPrice,
+        width = width,
+        onChange = function(checked)
             PRV.Config.showOnlyWithPrice = checked
             PRV.Config:Save()
-        end
-    )
-    yPos = newY - 8
-    
-    local thresholdContainer, thresholdSlider = PeaversCommons.ConfigUIUtils.CreateSlider(
-        content, "PRVPriceThresholdSlider",
-        "Price Threshold (gold)", 0, 10000, 10,
-        PRV.Config.priceThreshold, 400,
-        function(value)
+        end,
+    })
+    toggle2:SetPoint("TOPLEFT", indent, y)
+    y = y - 30
+
+    local thresholdSlider = W:CreateSlider(parentFrame, "Price Threshold (gold)", {
+        min = 0, max = 10000, step = 10,
+        value = PRV.Config.priceThreshold,
+        width = width,
+        onChange = function(value)
             PRV.Config.priceThreshold = value
             PRV.Config:Save()
-        end
-    )
-    thresholdContainer:SetPoint("TOPLEFT", controlIndent, yPos)
-    yPos = yPos - 55
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateCheckbox(
-        content,
-        "PRVDebugCheckbox",
-        "Enable debug messages",
-        controlIndent, yPos,
-        PRV.Config.debugMode,
-        function(checked)
+        end,
+    })
+    thresholdSlider:SetPoint("TOPLEFT", indent, y)
+    y = y - 52
+
+    local debugToggle = W:CreateToggle(parentFrame, "Enable debug messages", {
+        checked = PRV.Config.debugMode,
+        width = width,
+        onChange = function(checked)
             PRV.Config.debugMode = checked
             PRV.Config.DEBUG_ENABLED = checked
             PRV.Config:Save()
-        end
-    )
-    yPos = newY - 15
-    
-    return yPos
+        end,
+    })
+    debugToggle:SetPoint("TOPLEFT", indent, y)
+    y = y - 30
+
+    parentFrame:SetHeight(math.abs(y) + 30)
 end
 
+function ConfigUI:BuildCurrencyPage(parentFrame)
+    local y = -10
+    local opts = GetPageOpts(parentFrame)
+    local indent = opts.indent
+    local width = opts.width
 
-function ConfigUI:CreateCurrencyOptions(content, yPos, baseSpacing, sectionSpacing)
-    local controlIndent = baseSpacing + 15
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateSeparator(content, baseSpacing, yPos)
-    yPos = newY - 15
-    
-    local header, newY = PeaversCommons.ConfigUIUtils.CreateSectionHeader(content, "Currency Settings", baseSpacing, yPos)
-    yPos = newY - 10
-    
+    local _, newY = W:CreateSectionHeader(parentFrame, "Currency Settings", indent, y)
+    y = newY - 8
+
     local currencies = {
-        USD = "US Dollar ($)",
-        EUR = "Euro (€)",
-        GBP = "British Pound (£)",
-        AUD = "Australian Dollar (A$)",
-        CAD = "Canadian Dollar (C$)",
-        JPY = "Japanese Yen (¥)",
-        CNY = "Chinese Yuan (¥)",
-        KRW = "Korean Won (₩)"
+        { value = "USD", label = "US Dollar ($)" },
+        { value = "EUR", label = "Euro (€)" },
+        { value = "GBP", label = "British Pound (£)" },
+        { value = "AUD", label = "Australian Dollar (A$)" },
+        { value = "CAD", label = "Canadian Dollar (C$)" },
+        { value = "JPY", label = "Japanese Yen (¥)" },
+        { value = "CNY", label = "Chinese Yuan (¥)" },
+        { value = "KRW", label = "Korean Won (₩)" },
     }
-    
-    local currencyContainer, currencyDropdown = PeaversCommons.ConfigUIUtils.CreateDropdown(
-        content, "PRVTargetCurrencyDropdown",
-        "Target Currency", currencies,
-        currencies[PRV.Config.targetCurrency] or "US Dollar ($)", 400,
-        function(value)
+
+    local currencyDropdown = W:CreateDropdown(parentFrame, "Target Currency", {
+        options = currencies,
+        selected = PRV.Config.targetCurrency or "USD",
+        width = width,
+        onChange = function(value)
             PRV.Config.targetCurrency = value
             PRV.Config:Save()
-        end
-    )
-    currencyContainer:SetPoint("TOPLEFT", controlIndent, yPos)
-    yPos = yPos - 65
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateCheckbox(
-        content,
-        "PRVShowSymbolCheckbox",
-        "Show currency symbol",
-        controlIndent, yPos,
-        PRV.Config.showSymbol,
-        function(checked)
+        end,
+    })
+    currencyDropdown:SetPoint("TOPLEFT", indent, y)
+    y = y - 58
+
+    local symbolToggle = W:CreateToggle(parentFrame, "Show currency symbol", {
+        checked = PRV.Config.showSymbol,
+        width = width,
+        onChange = function(checked)
             PRV.Config.showSymbol = checked
             PRV.Config:Save()
-        end
-    )
-    yPos = newY - 8
-    
-    local decimalContainer, decimalSlider = PeaversCommons.ConfigUIUtils.CreateSlider(
-        content, "PRVDecimalPlacesSlider",
-        "Decimal Places", 0, 4, 1,
-        PRV.Config.decimalPlaces, 400,
-        function(value)
+        end,
+    })
+    symbolToggle:SetPoint("TOPLEFT", indent, y)
+    y = y - 30
+
+    local decimalSlider = W:CreateSlider(parentFrame, "Decimal Places", {
+        min = 0, max = 4, step = 1,
+        value = PRV.Config.decimalPlaces,
+        width = width,
+        onChange = function(value)
             PRV.Config.decimalPlaces = value
             PRV.Config:Save()
-        end
-    )
-    decimalContainer:SetPoint("TOPLEFT", controlIndent, yPos)
-    yPos = yPos - 55
-    
-    return yPos
+        end,
+    })
+    decimalSlider:SetPoint("TOPLEFT", indent, y)
+    y = y - 52
+
+    parentFrame:SetHeight(math.abs(y) + 30)
 end
 
-function ConfigUI:CreatePriceSourceOptions(content, yPos, baseSpacing, sectionSpacing)
-    local controlIndent = baseSpacing + 15
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateSeparator(content, baseSpacing, yPos)
-    yPos = newY - 15
-    
-    local header, newY = PeaversCommons.ConfigUIUtils.CreateSectionHeader(content, "Price Source Settings", baseSpacing, yPos)
-    yPos = newY - 10
-    
-    -- Price source dropdown
+function ConfigUI:BuildSourcePage(parentFrame)
+    local y = -10
+    local opts = GetPageOpts(parentFrame)
+    local indent = opts.indent
+    local width = opts.width
+
+    local _, newY = W:CreateSectionHeader(parentFrame, "Price Source Settings", indent, y)
+    y = newY - 8
+
     local priceSources = {
-        auction = "Auction House (if available)",
-        vendor = "Vendor Prices Only"
+        { value = "auction", label = "Auction House (if available)" },
+        { value = "vendor", label = "Vendor Prices Only" },
     }
-    
-    local sourceContainer, sourceDropdown = PeaversCommons.ConfigUIUtils.CreateDropdown(
-        content, "PRVPriceSourceDropdown",
-        "Price Source", priceSources,
-        priceSources[PRV.Config.priceSource] or "Auction House (if available)", 400,
-        function(value)
+
+    local sourceDropdown = W:CreateDropdown(parentFrame, "Price Source", {
+        options = priceSources,
+        selected = PRV.Config.priceSource or "auction",
+        width = width,
+        onChange = function(value)
             PRV.Config.priceSource = value
             PRV.Config:Save()
             PRV.PriceCache:Clear()
             Utils.Print(PRV, "Price source changed - cache cleared")
-        end
-    )
-    sourceContainer:SetPoint("TOPLEFT", controlIndent, yPos)
-    yPos = yPos - 65
-    
-    local infoText = content:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-    infoText:SetPoint("TOPLEFT", controlIndent, yPos)
-    infoText:SetText("Auction prices use TSM or Auctionator if available")
-    infoText:SetTextColor(0.7, 0.7, 0.7)
-    yPos = yPos - 20
-    
-    return yPos
-end
+        end,
+    })
+    sourceDropdown:SetPoint("TOPLEFT", indent, y)
+    y = y - 58
 
-function ConfigUI:CreatePerformanceOptions(content, yPos, baseSpacing, sectionSpacing)
-    local controlIndent = baseSpacing + 15
-    
-    local _, newY = PeaversCommons.ConfigUIUtils.CreateSeparator(content, baseSpacing, yPos)
-    yPos = newY - 15
-    
-    local header, newY = PeaversCommons.ConfigUIUtils.CreateSectionHeader(content, "Performance Settings", baseSpacing, yPos)
-    yPos = newY - 10
-    
-    local cacheContainer, cacheSlider = PeaversCommons.ConfigUIUtils.CreateSlider(
-        content, "PRVCacheExpirySlider",
-        "Cache Expiry (seconds)", 300, 7200, 60,
-        PRV.Config.cacheExpiry, 400,
-        function(value)
+    local infoText = parentFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    infoText:SetPoint("TOPLEFT", indent, y)
+    infoText:SetText("Auction prices use TSM or Auctionator if available")
+    infoText:SetTextColor(C.textMuted[1], C.textMuted[2], C.textMuted[3])
+    y = y - 30
+
+    local _, newY = W:CreateSectionHeader(parentFrame, "Performance Settings", indent, y)
+    y = newY - 8
+
+    local cacheSlider = W:CreateSlider(parentFrame, "Cache Expiry (seconds)", {
+        min = 300, max = 7200, step = 60,
+        value = PRV.Config.cacheExpiry,
+        width = width,
+        onChange = function(value)
             PRV.Config.cacheExpiry = value
             PRV.Config:Save()
-        end
-    )
-    cacheContainer:SetPoint("TOPLEFT", controlIndent, yPos)
-    yPos = yPos - 55
-    
-    local clearButton = CreateFrame("Button", "PRVClearCacheButton", content, "UIPanelButtonTemplate")
-    clearButton:SetPoint("TOPLEFT", controlIndent, yPos)
-    clearButton:SetSize(150, 25)
-    clearButton:SetText("Clear Price Cache")
-    clearButton:SetScript("OnClick", function()
-        PRV.PriceCache:Clear()
-        Utils.Print(PRV, "Price cache cleared")
-    end)
-    yPos = yPos - 35
-    
-    return yPos
+        end,
+    })
+    cacheSlider:SetPoint("TOPLEFT", indent, y)
+    y = y - 52
+
+    local clearBtn = W:CreateButton(parentFrame, "Clear Price Cache", {
+        style = "secondary",
+        width = 150,
+        onClick = function()
+            PRV.PriceCache:Clear()
+            Utils.Print(PRV, "Price cache cleared")
+        end,
+    })
+    clearBtn:SetPoint("TOPLEFT", indent, y)
+    y = y - 40
+
+    parentFrame:SetHeight(math.abs(y) + 30)
 end
 
-function ConfigUI:Initialize()
-    self.panel = self:InitializeOptions()
-    self.ratesPanel = self:InitializeRatesPanel()
-end
+function ConfigUI:BuildRatesPage(parentFrame)
+    local y = -10
+    local opts = GetPageOpts(parentFrame)
+    local indent = opts.indent
 
-function ConfigUI:Open()
-    local addon = _G[addonName]
+    local PCD = _G.PeaversCurrencyData
+    if not PCD then
+        local errorText = W:CreateLabel(parentFrame, "PeaversCurrencyData not available", { color = C.danger })
+        errorText:SetPoint("TOPLEFT", indent, y)
+        parentFrame:SetHeight(40)
+        return
+    end
 
-    if Settings and Settings.OpenToCategory and addon then
-        if addon.directSettingsCategoryID then
-            local success = pcall(Settings.OpenToCategory, addon.directSettingsCategoryID)
-            if success then return end
-        end
+    local _, newY = W:CreateSectionHeader(parentFrame, "Data Freshness", indent, y)
+    y = newY - 8
 
-        if addon.directCategoryID then
-            local success = pcall(Settings.OpenToCategory, addon.directCategoryID)
-            if success then return end
-        end
+    local lastUpdatedLabel = W:CreateLabel(parentFrame, "Last Updated: " .. (PCD:GetLastUpdated() or "Unknown"), { color = C.textSec })
+    lastUpdatedLabel:SetPoint("TOPLEFT", indent, y)
+    y = y - 30
 
-        if addon.mainCategory then
-            local success = pcall(Settings.OpenToCategory, addon.mainCategory)
-            if success then return end
+    local _, newY = W:CreateSectionHeader(parentFrame, "WoW Token Prices", indent, y)
+    y = newY - 8
+
+    local currentRegion = PRV.TooltipHook and PRV.TooltipHook.GetCurrentRegionName and PRV.TooltipHook:GetCurrentRegionName() or "US"
+
+    if PCD.TokenPrices and PCD.TokenPrices.regions then
+        local regionData = PCD.TokenPrices.regions[currentRegion]
+        if regionData then
+            local tokenText = string.format("%s = %s",
+                PCD:FormatWoWCurrency(regionData.goldPrice),
+                PCD:FormatCurrency(regionData.realPrice, regionData.currency))
+            local regionLabel = W:CreateLabel(parentFrame, currentRegion .. " Region: " .. tokenText, { color = C.gold })
+            regionLabel:SetPoint("TOPLEFT", indent, y)
+            y = y - 25
+
+            local goldValue = regionData.realPrice / regionData.goldPrice
+            local goldLabel = W:CreateLabel(parentFrame, "1 Gold = " .. PCD:FormatCurrency(goldValue, regionData.currency, nil, 6), { color = C.textSec })
+            goldLabel:SetPoint("TOPLEFT", indent, y)
+            y = y - 35
         end
     end
 
-    if SettingsPanel then
-        SettingsPanel:Open()
+    local _, newY = W:CreateSectionHeader(parentFrame, "Currency Exchange Rates", indent, y)
+    y = newY - 8
+
+    local commonCurrencies = {"EUR", "GBP", "AUD", "CAD", "JPY", "CNY", "KRW"}
+
+    for _, currency in ipairs(commonCurrencies) do
+        local rate = PCD:GetExchangeRate("USD", currency)
+        if rate then
+            local symbol = PCD:GetCurrencySymbol(currency)
+            local extra = (symbol and symbol ~= currency) and (" (" .. symbol .. ")") or ""
+            local rateLabel = W:CreateLabel(parentFrame,
+                string.format("1 USD = %.4f %s%s", rate, currency, extra), { color = C.textSec })
+            rateLabel:SetPoint("TOPLEFT", indent, y)
+            y = y - 20
+        end
+    end
+
+    parentFrame:SetHeight(math.abs(y) + 30)
+end
+
+function ConfigUI:GetPages()
+    return {
+        { key = "general", label = "General", builder = function(f) ConfigUI:BuildGeneralPage(f) end },
+        { key = "currency", label = "Currency", builder = function(f) ConfigUI:BuildCurrencyPage(f) end },
+        { key = "source", label = "Source", builder = function(f) ConfigUI:BuildSourcePage(f) end },
+        { key = "rates", label = "Rates", builder = function(f) ConfigUI:BuildRatesPage(f) end },
+    }
+end
+
+function ConfigUI:BuildIntoFrame(parentFrame)
+    self:BuildGeneralPage(parentFrame)
+    return parentFrame
+end
+
+function ConfigUI:Initialize()
+end
+
+function ConfigUI:Open()
+    if _G.PeaversConfig and _G.PeaversConfig.MainFrame then
+        _G.PeaversConfig.MainFrame:Show()
+        _G.PeaversConfig.MainFrame:SelectAddon("PeaversRealValue")
+        return
+    end
+
+    if Settings and Settings.OpenToCategory then
+        local addon = _G[addonName]
+        if addon and addon.directSettingsCategoryID then
+            pcall(Settings.OpenToCategory, addon.directSettingsCategoryID)
+        end
     end
 end
 

@@ -1,9 +1,14 @@
+--------------------------------------------------------------------------------
+-- PeaversRealValue Configuration
+-- Uses PeaversCommons.ConfigManager with AceDB-3.0 for profile management
+--------------------------------------------------------------------------------
+
 local addonName, PRV = ...
 
 local PeaversCommons = _G.PeaversCommons
 local ConfigManager = PeaversCommons.ConfigManager
 
-local Config = ConfigManager:New(addonName, {
+local PRV_DEFAULTS = {
     enabled = true,
     debugMode = false,
     showOnlyWithPrice = true,
@@ -13,8 +18,16 @@ local Config = ConfigManager:New(addonName, {
     showSymbol = true,
     decimalPlaces = 2,
     priceSource = "auction",
-})
+}
 
-PRV.Config = Config
+-- Create the AceDB-backed config
+PRV.Config = ConfigManager:NewWithAceDB(
+    PRV,
+    PRV_DEFAULTS,
+    {
+        savedVariablesName = "PeaversRealValueDB",
+        profileType = "shared",
+    }
+)
 
-return Config
+return PRV.Config
