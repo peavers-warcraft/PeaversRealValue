@@ -78,6 +78,18 @@ PeaversCommons.Events:Init(addonName, function()
             PRV.directRatesCategory = ratesCategory
         end
     end)
+    -- Register with PeaversConfig registry
+    if PeaversCommons.ConfigRegistry then
+        PeaversCommons.ConfigRegistry:Register({
+            name = "PeaversRealValue",
+            displayName = "Real Value",
+            description = "Real-world currency values for items",
+            addonRef = PRV,
+            config = PRV.Config,
+            pages = PRV.ConfigUI:GetPages(),
+            order = 9,
+        })
+    end
 end, {
     suppressAnnouncement = true
 })
