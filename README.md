@@ -15,7 +15,7 @@ A World of Warcraft addon that displays real-world currency values of items in t
 ## Installation
 
 1. Download from [CurseForge](https://www.curseforge.com/wow/addons/peaversrealvalue)
-2. Ensure PeaversCommons and PeaversCurrencyData are also installed
+2. Ensure [PeaversCommons](https://www.curseforge.com/wow/addons/peaverscommons), [PeaversCurrencyData](https://www.curseforge.com/wow/addons/peaverscurrencydata), and [PeaversConfig](https://www.curseforge.com/wow/addons/peaversconfig) are also installed
 3. Enable the addon on the character selection screen
 
 ## Usage
@@ -39,5 +39,6 @@ Access settings through `/prv`:
 
 ## Dependencies
 
-- PeaversCommons (required)
-- PeaversCurrencyData (required)
+- [PeaversCommons](https://www.curseforge.com/wow/addons/peaverscommons) (required)
+- [PeaversCurrencyData](https://www.curseforge.com/wow/addons/peaverscurrencydata) (required)
+- [PeaversConfig](https://www.curseforge.com/wow/addons/peaversconfig) (required)

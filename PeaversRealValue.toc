@@ -12,7 +12,7 @@
 ## X-Source-Code: https://github.com/peavers-warcraft/PeaversRealValue
 ## X-Curse-Project-ID: 1266922
 
-## Dependencies: PeaversCommons, PeaversCurrencyData
+## Dependencies: PeaversCommons, PeaversCurrencyData, PeaversConfig
 ## SavedVariables: PeaversRealValueDB
 
 Changelog.lua
