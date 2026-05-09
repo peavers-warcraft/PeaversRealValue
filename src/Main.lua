@@ -53,31 +53,21 @@ PeaversCommons.Events:Init(addonName, function()
         PRV.PriceCache:Save()
     end, "PRV_SaveCache")
     
-    -- Create settings pages
     C_Timer.After(0.5, function()
-        PeaversCommons.SettingsUI:CreateSettingsPages(
-            PRV,
-            "PeaversRealValue",
-            "Peavers Real Value",
-            "Shows the real-world dollar value of items based on their auction house price.",
-            {
-                "/prv - Open configuration",
-                "/prv clear - Clear price cache",
-                "/prv debug - Toggle debug mode",
-                "/prv config - Open settings"
-            }
-        )
-        
-        -- Register the Rates panel as a subcategory
-        if PRV.directCategory and PRV.ConfigUI.ratesPanel then
-            local ratesCategory = Settings.RegisterCanvasLayoutSubcategory(
-                PRV.directCategory, 
-                PRV.ConfigUI.ratesPanel, 
-                PRV.ConfigUI.ratesPanel.name
-            )
-            PRV.directRatesCategory = ratesCategory
-        end
+        PeaversCommons.SettingsUI:CreateRedirectPage(PRV, "PeaversRealValue", "Peavers Real Value")
     end)
+    -- Register with PeaversConfig registry
+    if PeaversCommons.ConfigRegistry then
+        PeaversCommons.ConfigRegistry:Register({
+            name = "PeaversRealValue",
+            displayName = "Real Value",
+            description = "Real-world currency values for items",
+            addonRef = PRV,
+            config = PRV.Config,
+            pages = PRV.ConfigUI:GetPages(),
+            order = 9,
+        })
+    end
 end, {
     suppressAnnouncement = true
 })
