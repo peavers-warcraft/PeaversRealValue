@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: PeaversRealValue
+  description: "A World of Warcraft addon that displays real-world currency values of items in tooltips, converting their gold value based on current WoW Token prices."
+  annotations:
+    github.com/project-slug: peavers-warcraft/PeaversRealValue
+spec:
+  type: library
+  lifecycle: production
+  owner: peavers-warcraft
