@@ -173,7 +173,7 @@ function ConfigUI:BuildSourcePage(parentFrame)
     infoText:SetTextColor(C.textMuted[1], C.textMuted[2], C.textMuted[3])
     y = y - 30
 
-    local _, newY = W:CreateSectionHeader(parentFrame, "Performance Settings", indent, y)
+    _, newY = W:CreateSectionHeader(parentFrame, "Performance Settings", indent, y)
     y = newY - 8
 
     local cacheSlider = W:CreateSlider(parentFrame, "Cache Expiry (seconds)", {
@@ -222,7 +222,7 @@ function ConfigUI:BuildRatesPage(parentFrame)
     lastUpdatedLabel:SetPoint("TOPLEFT", indent, y)
     y = y - 30
 
-    local _, newY = W:CreateSectionHeader(parentFrame, "WoW Token Prices", indent, y)
+    _, newY = W:CreateSectionHeader(parentFrame, "WoW Token Prices", indent, y)
     y = newY - 8
 
     local currentRegion = PRV.TooltipHook and PRV.TooltipHook.GetCurrentRegionName and PRV.TooltipHook:GetCurrentRegionName() or "US"
@@ -244,7 +244,7 @@ function ConfigUI:BuildRatesPage(parentFrame)
         end
     end
 
-    local _, newY = W:CreateSectionHeader(parentFrame, "Currency Exchange Rates", indent, y)
+    _, newY = W:CreateSectionHeader(parentFrame, "Currency Exchange Rates", indent, y)
     y = newY - 8
 
     local commonCurrencies = {"EUR", "GBP", "AUD", "CAD", "JPY", "CNY", "KRW"}

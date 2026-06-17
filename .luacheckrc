@@ -18,3 +18,6 @@ stds.wow        = base.wow
 -- base.globals (PeaversChangelogs, SlashCmdList) + this addon's SavedVariables.
 globals = base.globals
 for _, g in ipairs({"PeaversRealValueDB"}) do globals[#globals + 1] = g end
+
+-- Optional third-party price-source addons RealValue reads when installed.
+read_globals = { "TSM", "Auctionator" }

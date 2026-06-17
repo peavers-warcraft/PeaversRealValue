@@ -33,8 +33,8 @@ local function FormatRealValue(goldValue)
     local goldAmount = goldValue / 10000
     local region = TooltipHook:GetCurrentRegionName()
     local targetCurrency = PRV.Config.targetCurrency
-    local decimalPlaces = PRV.Config.decimalPlaces
-    
+    local decimalPlaces
+
     local realValue = PCD:GoldToCurrency(goldAmount, region, targetCurrency)
     
     if not realValue then
@@ -118,22 +118,22 @@ function TooltipHook:Initialize()
                     for _, event in ipairs(hookEvents) do
                         local originalScript = tooltip:GetScript(event)
                         if originalScript then
-                            tooltip:SetScript(event, function(self, ...)
-                                originalScript(self, ...)
-                                
+                            tooltip:SetScript(event, function(frame, ...)
+                                originalScript(frame, ...)
+
                                 local _, itemLink
-                                if self.GetItem then
-                                    _, itemLink = self:GetItem()
+                                if frame.GetItem then
+                                    _, itemLink = frame:GetItem()
                                     if itemLink then
-                                        self.prvLastItemLink = itemLink
+                                        frame.prvLastItemLink = itemLink
                                     end
                                 end
-                                
-                                if self.prvLastItemLink and event == "OnShow" then
-                                    local itemID = tonumber(self.prvLastItemLink:match("item:(%d+)"))
+
+                                if frame.prvLastItemLink and event == "OnShow" then
+                                    local itemID = tonumber(frame.prvLastItemLink:match("item:(%d+)"))
                                     if itemID then
                                         local tooltipData = {id = itemID}
-                                        TooltipHook:ProcessTooltipData(self, tooltipData)
+                                        TooltipHook:ProcessTooltipData(frame, tooltipData)
                                     end
                                 end
                             end)
