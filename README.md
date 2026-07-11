@@ -35,6 +35,7 @@ Access settings through `/prv`:
 - **Cache Settings**: Configure cache expiry and clearing
 <!-- /peavers:configuration -->
 
+
 ## Installation
 
 ### Recommended: PeaversUpdater
