@@ -1,6 +1,6 @@
 # PeaversRealValue
 
-[![AddonSentry](https://api.addonsentry.io/api/public/repos/peavers-warcraft/PeaversRealValue/badge.svg)](https://addonsentry.io/dashboard/peavers-warcraft/PeaversRealValue)
+[![AddonSentry](https://addonsentry.io/api/public/repos/peavers-warcraft/PeaversRealValue/badge.svg)](https://addonsentry.io/dashboard/peavers-warcraft/PeaversRealValue)
 
 A World of Warcraft addon that displays real-world currency values of items in tooltips, converting their gold value based on current WoW Token prices.
 
