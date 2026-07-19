@@ -32,7 +32,7 @@ function ConfigUI:BuildGeneralPage(parentFrame)
     local _, newY = W:CreateSectionHeader(parentFrame, "General Settings", indent, y)
     y = newY - 8
 
-    local toggle1 = W:CreateToggle(parentFrame, "Enable real value display", {
+    local toggle1 = W:CreateCheckbox(parentFrame, "Enable real value display", {
         checked = PRV.Config.enabled,
         width = width,
         onChange = function(checked)
@@ -43,7 +43,7 @@ function ConfigUI:BuildGeneralPage(parentFrame)
     toggle1:SetPoint("TOPLEFT", indent, y)
     y = y - 30
 
-    local toggle2 = W:CreateToggle(parentFrame, "Only show value for items with known auction house prices", {
+    local toggle2 = W:CreateCheckbox(parentFrame, "Only show value for items with known auction house prices", {
         checked = PRV.Config.showOnlyWithPrice,
         width = width,
         onChange = function(checked)
@@ -66,7 +66,7 @@ function ConfigUI:BuildGeneralPage(parentFrame)
     thresholdSlider:SetPoint("TOPLEFT", indent, y)
     y = y - 52
 
-    local debugToggle = W:CreateToggle(parentFrame, "Enable debug messages", {
+    local debugToggle = W:CreateCheckbox(parentFrame, "Enable debug messages", {
         checked = PRV.Config.debugMode,
         width = width,
         onChange = function(checked)
@@ -113,7 +113,7 @@ function ConfigUI:BuildCurrencyPage(parentFrame)
     currencyDropdown:SetPoint("TOPLEFT", indent, y)
     y = y - 58
 
-    local symbolToggle = W:CreateToggle(parentFrame, "Show currency symbol", {
+    local symbolToggle = W:CreateCheckbox(parentFrame, "Show currency symbol", {
         checked = PRV.Config.showSymbol,
         width = width,
         onChange = function(checked)
