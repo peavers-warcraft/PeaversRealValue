@@ -264,8 +264,30 @@ function ConfigUI:BuildRatesPage(parentFrame)
     parentFrame:SetHeight(math.abs(y) + 30)
 end
 
+function ConfigUI:BuildInfoPage(parentFrame)
+    PeaversCommons.ConfigUIUtils.BuildInfoPage(parentFrame, "Real Value", {
+        "Shows what items are worth in real-world money. Hover over any item " ..
+            "and the tooltip adds its value in your chosen currency.",
+        { command = "/prv", desc = "open the configuration panel" },
+        { command = "/prv clear", desc = "clear the price cache" },
+
+        { header = "How the conversion works" },
+        "The WoW Token gives gold an exchange rate: the token costs real money " ..
+            "in the shop and sells for gold on the Auction House. Dividing one " ..
+            "by the other prices a single gold coin, and an item's gold value " ..
+            "converts from there. The token price is live, so values move with " ..
+            "the market.",
+
+        { header = "Where item prices come from" },
+        "With TSM or Auctionator installed, current auction prices are used. " ..
+            "Without them, the item's vendor price is the fallback. Prices are " ..
+            "cached briefly for performance - /prv clear resets the cache.",
+    })
+end
+
 function ConfigUI:GetPages()
     return {
+        { key = "info", label = "Information", builder = function(f) ConfigUI:BuildInfoPage(f) end },
         { key = "general", label = "General", builder = function(f) ConfigUI:BuildGeneralPage(f) end },
         { key = "currency", label = "Currency", builder = function(f) ConfigUI:BuildCurrencyPage(f) end },
         { key = "source", label = "Source", builder = function(f) ConfigUI:BuildSourcePage(f) end },
